@@ -1,0 +1,35 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "avs-settings": {
+            "type": "object",
+            "metadata": {
+                "description": "These are settings for the Availibilty Set"
+            }
+        }
+    },
+    "variables": {},
+    "resources": [
+        {
+            "name": "[parameters('avs-settings').name]",
+            "type": "Microsoft.Compute/availabilitySets",
+            "location": "[resourceGroup().location]",
+            "apiVersion": "2015-06-15",
+            "dependsOn": [],
+            "tags": {
+                "displayName": "[parameters('avs-settings').name]"
+            },
+            "properties": {
+                "platformUpdateDomainCount": "[parameters('avs-settings').updateCount]",
+                "platformFaultDomainCount": "[parameters('avs-settings').faultCount]"
+            }
+        }
+    ],
+    "outputs": {
+        "avsID": {
+            "value": "[resourceId('Microsoft.Compute/availabilitySets', parameters('avs-settings').name)]",
+            "type": "string"
+        }
+    }
+}
