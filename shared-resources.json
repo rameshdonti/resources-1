@@ -1,0 +1,108 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "storage-settings": {
+            "type": "object",
+            "metadata": {
+                "description": "These are settings for the Storage Account"
+            }
+        },
+        "vnet-settings": {
+            "type": "object",
+            "metadata": {
+                "description": "These are settings for the Virtual Network"
+            }
+        },
+        "avs-settings": {
+            "type": "object",
+            "metadata": {
+                "description": "These are settings for the Availibility Set"
+            }
+        },
+        "resourcesUrl": {
+            "type": "string",
+            "metadata": {
+                "description": "Resources Url for Resource Templates"
+            }
+        }
+    },
+    "variables": {
+        "storageTemplateUrl": "[concat(parameters('resourcesUrl'), '/storage-', parameters('storage-settings').newOrExisting, '.template.json')]",
+        "vnetTemplateUrl": "[concat(parameters('resourcesUrl'), '/vnet-', parameters('vnet-settings').newOrExisting, '.template.json')]",
+        "avsTemplateUrl": "[concat(parameters('resourcesUrl'), '/avs.template.json')]"
+    },
+    "resources": [
+        {
+            "name": "[parameters('storage-settings').accounts[copyIndex()]]",
+            "copy": {
+                "name": "storageLoop",
+                "count": "[parameters('storage-settings').count]"
+            },
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2015-01-01",
+            "dependsOn": [],
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[variables('storageTemplateUrl')]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "storage-settings": {
+                        "value": {
+                            "name": "[parameters('storage-settings').accounts[copyIndex()]]",
+                            "accountType": "[parameters('storage-settings').accountType]"
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "name": "[parameters('vnet-settings').name]",
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2016-09-01",
+            "dependsOn": [],
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[variables('vnetTemplateUrl')]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "vnet-settings": {
+                        "value": "[parameters('vnet-settings')]"
+                    }
+                }
+            }
+        },
+        {
+            "name": "[parameters('avs-settings').name]",
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2016-09-01",
+            "dependsOn": [],
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[variables('avsTemplateUrl')]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "avs-settings": {
+                        "value": "[parameters('avs-settings')]"
+                    }
+                }
+            }
+        }
+    ],
+    "outputs": {
+        "avsID": {
+            "value": "[reference(parameters('avs-settings').name).outputs.avsID.value]",
+            "type": "string"
+        },
+        "vnetID": {
+            "value": "[reference(parameters('vnet-settings').name).outputs.vnetID.value]",
+            "type": "string"
+        }
+    }
+}
