@@ -1,0 +1,37 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "nic-settings": {
+            "type": "object",
+            "metadata": {
+                "description": "These are settings for the Network Interface"
+            }
+        }
+    },
+    "variables": {},
+    "resources": [
+        {
+            "name": "[parameters('nic-settings').name]",
+            "type": "Microsoft.Network/networkInterfaces",
+            "location": "[resourceGroup().location]",
+            "apiVersion": "2016-03-30",
+            "dependsOn": [],
+            "tags": {
+                "displayName": "[parameters('nic-settings').name]"
+            },
+            "properties": {
+                "ipConfigurations": "[parameters('nic-settings').ipConfigurations]",
+                "dnsSettings": "[parameters('nic-settings').dnsSettings]",
+                "enableIPForwarding": "[parameters('nic-settings').enableIPForwarding]",
+                "networkSecurityGroup": "[parameters('nic-settings').networkSecurityGroup]"
+            }
+        }
+    ],
+    "outputs": {
+        "nicID": {
+            "value": "[resourceId('Microsoft.Network/networkInterfaces', parameters('nic-settings').name)]",
+            "type": "string"
+        }
+    }
+}
