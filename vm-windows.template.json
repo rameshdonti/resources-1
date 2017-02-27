@@ -1,0 +1,89 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "storage-settings": {
+            "type": "object",
+            "metadata": {
+                "description": "These are settings for the Storage"
+            }
+        },
+        "vm-settings": {
+            "type": "object",
+            "metadata": {
+                "description": "These are settings for a VM"
+            }
+        }
+    },
+    "variables": {
+        "storageName": "[parameters('storage-settings').name]",
+        "osDiskName": "[concat(parameters('vm-settings').name, '-osDisk')]",
+        "dataDiskName": "[concat(parameters('vm-settings').name, '-dataDisk')]"
+    },
+    "resources": [
+        {
+            "name": "[parameters('vm-settings').name]",
+            "type": "Microsoft.Compute/virtualMachines",
+            "location": "[resourceGroup().location]",
+            "apiVersion": "2015-06-15",
+            "dependsOn": [],
+            "tags": {
+                "displayName": "[parameters('vm-settings').name]"
+            },
+            "properties": {
+                "availabilitySet": {
+                    "id": "[parameters('vm-settings').avsID]"
+                },
+                "hardwareProfile": {
+                    "vmSize": "[parameters('vm-settings').vmSize]"
+                },
+                "osProfile": {
+                    "computerName": "[parameters('vm-settings').name]",
+                    "adminUsername": "[parameters('vm-settings').adminUsername]",
+                    "adminPassword": "[parameters('vm-settings').adminPassword]",
+                    "windowsConfiguration": {
+                        "provisionVMAgent": true,
+                        "enableAutomaticUpdates": true
+                    }
+                },
+                "storageProfile": {
+                    "imageReference": {
+                        "publisher": "[parameters('vm-settings').imagePublisher]",
+                        "offer": "[parameters('vm-settings').imageOffer]",
+                        "sku": "[parameters('vm-settings').imageSku]",
+                        "version": "latest"
+                    },
+                    "osDisk": {
+                        "name": "[variables('osDiskName')]",
+                        "vhd": {
+                            "uri": "[concat('https://', variables('storageName'), '.blob.core.windows.net/', parameters('vm-settings').storageAccountContainerName, '/', variables('osDiskName'), '.vhd')]"
+                        },
+                        "caching": "ReadWrite",
+                        "createOption": "FromImage"
+                    },
+                    "dataDisks": [
+                        {
+                            "name": "[variables('dataDiskName')]",
+                            "lun": 0,
+                            "diskSizeGB": "50",
+                            "vhd": {
+                                "uri": "[concat('https://', variables('storageName'), '.blob.core.windows.net/', parameters('vm-settings').storageAccountContainerName, '/', variables('dataDiskName'), '.vhd')]"
+                            },
+                            "caching": "ReadOnly",
+                            "createOption": "Empty"
+                        }
+                    ]
+                },
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "id": "[parameters('vm-settings').nicID]"
+                        }
+                    ]
+                }
+            }
+        }
+    ],
+    "outputs": {
+    }
+}
