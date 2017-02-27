@@ -65,7 +65,7 @@
                         {
                             "name": "[variables('dataDiskName')]",
                             "lun": 0,
-                            "diskSizeGB": "50",
+                            "diskSizeGB": "20",
                             "vhd": {
                                 "uri": "[concat('https://', variables('storageName'), '.blob.core.windows.net/', parameters('vm-settings').storageAccountContainerName, '/', variables('dataDiskName'), '.vhd')]"
                             },
