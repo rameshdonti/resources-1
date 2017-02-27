@@ -1,0 +1,40 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "vnet-settings": {
+            "type": "object",
+            "metadata": {
+                "description": "These are settings for the Virtual Network"
+            }
+        }
+    },
+    "variables": {
+    },
+    "resources": [
+        {
+            "name": "[parameters('vnet-settings').name]",
+            "type": "Microsoft.Network/virtualNetworks",
+            "location": "[resourceGroup().location]",
+            "apiVersion": "2015-06-15",
+            "dependsOn": [],
+            "tags": {
+                "displayName": "[parameters('vnet-settings').name]"
+            },
+            "properties": {
+                "addressSpace": {
+                    "addressPrefixes": [
+                        "[parameters('vnet-settings').prefix]"
+                    ]
+                },
+                "subnets": "[parameters('vnet-settings').subnets]"
+            }
+        }
+    ],
+    "outputs": {
+      "vnetID": {
+        "value": "[resourceId('Microsoft.Network/virtualNetworks', parameters('vnet-settings').name)]",
+        "type": "string"
+      }
+    }
+}
