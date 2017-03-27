@@ -1,0 +1,62 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "lb-settings": {
+            "type": "object",
+            "metadata": {
+                "description": "These are settings for the Load Balancer"
+            }
+        }
+    },
+    "variables": {},
+    "resources": [
+        {
+            "name": "[parameters('lb-settings').name]",
+            "type": "Microsoft.Network/loadBalancers",
+            "location": "[resourceGroup().location]",
+            "apiVersion": "2016-03-30",
+            "dependsOn": [],
+            "tags": {
+                "displayName": "[parameters('lb-settings').name]"
+            },
+            "properties": {
+                "frontendIPConfigurations": "[parameters('lb-settings').frontendIPConfigurations]",
+                "backendAddressPools": "[parameters('lb-settings').backendAddressPools]",
+                "loadBalancingRules": "[parameters('lb-settings').loadBalancingRules]",
+                "probes": "[parameters('lb-settings').probes]",
+                "inboundNatRules": "[parameters('lb-settings').inboundNatRules]",
+                "outboundNatRules": "[parameters('lb-settings').outboundNatRules]",
+                "inboundNatPools": "[parameters('lb-settings').inboundNatPools]"
+            }
+        },
+        {
+            "apiVersion": "2016-03-30",
+            "type": "Microsoft.Network/loadBalancers/inboundNatRules",
+            "copy": {
+                "name": "lbRdpNatLoop",
+                "count": "[parameters('lb-settings').count]"
+            },
+            "name": "[concat(parameters('lb-settings').name, '/', 'nat-rdp-vm', copyIndex())]",
+            "location": "[resourceGroup().location]",
+            "dependsOn": [
+                "[concat('Microsoft.Network/loadBalancers/', parameters('lb-settings').name)]"
+            ],
+            "properties": {
+                "frontendIPConfiguration": {
+                    "id": "[resourceId('Microsoft.Network/loadBalancers/frontendIPConfigurations', parameters('lb-settings').name, 'lb-frontEnd')]"
+                },
+                "protocol": "tcp",
+                "frontendPort": "[copyIndex(5000)]",
+                "backendPort": "[parameters('lb-settings').backendPort]",
+                "enableFloatingIP": false
+            }
+        }
+    ],
+    "outputs": {
+        "lbID": {
+            "value": "[resourceId('Microsoft.Network/loadBalancers', parameters('lb-settings').name)]",
+            "type": "string"
+        }
+    }
+}
