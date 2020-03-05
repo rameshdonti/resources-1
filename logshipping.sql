@@ -224,12 +224,7 @@ AS
 --  Based on the DBAdmin proc of the same name.
 --
 --
---  When	Who		What
---  ==========	===============	===================================================
---  23/03/2004	Geoff Baxter	Created Original
---  25/03/2004	Geoff Baxter	Renamed to prevent conflict with PTPAdmin
---  01/06/2004	Geoff Baxter	Prevent null message being logged
---
+
 
 set nocount on
 
